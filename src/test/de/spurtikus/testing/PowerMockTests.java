@@ -1,6 +1,6 @@
 package de.spurtikus.testing;
 
-import org.junit.Ignore;
+//import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -27,6 +27,8 @@ import static org.powermock.api.support.membermodification.MemberModifier.stub;
  * Mocking private and static methods.
  *
  * There are examples that replace methods with a "No Operation" and even with a different implementation.
+ *
+ * More examples see e.g. here: https://blog.jayway.com/2013/03/05/beyond-mocking-with-powermock/
  */
 
 @RunWith(PowerMockRunner.class)
@@ -70,7 +72,6 @@ public class PowerMockTests {
      * @throws Exception on errors
      */
     @Test
-    //@Ignore
     public void test_replace_void_method_with_doNothing() throws Exception {
         // Mock inner service
         InnerService mock = PowerMockito.mock(InnerService.class);
@@ -108,8 +109,7 @@ public class PowerMockTests {
         OuterService outerService = new OuterService();
         outerService.setInnerService(spy);
 
-        // Replace innerProcessing() with doNothing(), i.e. method call
-        // will have no effects at all
+        // Replace innerProcessing() with doNothing(), i.e. method call will have no effects at all
         doNothing().when(spy, "innerProcessing", anyString(), anyString());
 
         // Do the call
@@ -125,8 +125,6 @@ public class PowerMockTests {
      * import static org.powermock.api.support.membermodification.MemberModifier.suppress;
      * import static org.powermock.api.support.membermodification.MemberMatcher.method;
      *
-     * More examples see here: https://blog.jayway.com/2013/03/05/beyond-mocking-with-powermock/
-
      * @throws Exception on errors
      */
     @Test
@@ -139,8 +137,7 @@ public class PowerMockTests {
         OuterService outerService = new OuterService();
         outerService.setInnerService(innerService);
 
-        // Suppress innerProcessing() i.e. method call
-        // will have no effects at all
+        // Suppress innerProcessing() i.e. method call will have no effects at all
         suppress(method(InnerService.class, "innerProcessing"));
 
         // Do the call
@@ -186,7 +183,8 @@ public class PowerMockTests {
      * This is done by using when().thenReturn construct.
      *
      * @throws Exception on errors
-     */    @Test
+     */
+    @Test
     public void test_replace_static_method_with_thenReturn() throws Exception {
          // Mock some or all static methods on class ExternalService
         PowerMockito.mockStatic(ExternalService.class);
@@ -214,7 +212,8 @@ public class PowerMockTests {
      * import static org.powermock.api.support.membermodification.MemberMatcher.method;
      *
      * @throws Exception on errors
-     */    @Test
+     */
+    @Test
     public void test_replace_static_method_with_stub() throws Exception {
         // Set up outer service.
         OuterService outerService = new OuterService();
@@ -238,8 +237,6 @@ public class PowerMockTests {
      * import java.lang.reflect.InvocationHandler
      *
      * Note that we do not need a "PowerMockito.mockStatic(ExternalService.class);" line when using stub().
-     *
-     * More examples see here: https://blog.jayway.com/2013/03/05/beyond-mocking-with-powermock/
      *
      * @throws Exception on errors
      */
