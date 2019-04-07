@@ -20,6 +20,9 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.powermock.api.mockito.PowerMockito.*;
 import static org.powermock.api.support.membermodification.MemberMatcher.method;
+import static org.powermock.api.support.membermodification.MemberModifier.suppress;
+import static org.powermock.api.support.membermodification.MemberModifier.stub;
+
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ PowerMockTests.InnerService.class, ExternalService.class})
@@ -55,7 +58,7 @@ public class PowerMockTests {
      */
     @Test
     //@Ignore
-    public void test_doNothing_replacement_for_void_method() throws Exception {
+    public void test_replace_void_method_with_doNothing() throws Exception {
         // Set up inner service
         InnerService innerService = new InnerService();
         InnerService spy = PowerMockito.spy(innerService);
@@ -75,13 +78,47 @@ public class PowerMockTests {
     }
 
     /**
+     * This test shows how to suppress a void method call (InnerService.innerProcessing()).
+     * This is done by using org.powermock.api.support.membermodification.MemberModifier.suppress() construct.
+     *
+     * Used PowerMock methods:
+     * import static org.powermock.api.support.membermodification.MemberModifier.suppress;
+     * import static org.powermock.api.support.membermodification.MemberModifier.stub;
+     *
+     *
+     * More examples see here: https://blog.jayway.com/2013/03/05/beyond-mocking-with-powermock/
+
+     * @throws Exception on errors
+     */
+    @Test
+    public void test_replace_void_method_with_suppress() throws Exception {
+        // Set up inner service
+        InnerService innerService = new InnerService();
+        //InnerService spy = PowerMockito.spy(innerService);
+
+        // Set up outer service. Use spy object instead of real object to allow PowerMockito to
+        // intercept method calls
+        OuterService outerService = new OuterService();
+        outerService.setInnerService(innerService);
+
+        // Suppress innerProcessing() i.e. method call
+        // will have no effects at all
+        suppress(method(InnerService.class, "innerProcessing"));
+
+        // Do the call
+        String ret = outerService.processValues("xyz", "ggg");
+        assertThat( ret, is("abc"));
+    }
+
+
+    /**
      * This test shows how to replace/mock a void method call (InnerService.innerProcessing() ) with another implementation.
      * This is done by using doAnswer().when() construct.
      *
      * @throws Exception on errors
      */
     @Test
-    public void test_answer_replacement_for_void_method() throws Exception {
+    public void test_replace_void_method_with_doAnswer() throws Exception {
         InnerService innerService = new InnerService();
         InnerService spy = PowerMockito.spy(innerService);
 
@@ -95,7 +132,7 @@ public class PowerMockTests {
             System.out.println("in method replacement");
             Object[] arguments = invocation.getArguments();
             if (arguments != null && arguments.length > 1 && arguments[0] != null && arguments[1] != null) {
-                System.out.println("method called with arguments: " + Arrays.toString(arguments));
+                System.out.println("Replacement code called with arguments: " + Arrays.toString(arguments));
                 assertEquals(arguments[0], "xyz");
             }
             return null;
@@ -112,7 +149,7 @@ public class PowerMockTests {
      *
      * @throws Exception on errors
      */    @Test
-    public void test_replace_static_method() throws Exception {
+    public void test_replace_static_method_with_thenReturn() throws Exception {
          // Mock some or all static methods on class ExternalService
         PowerMockito.mockStatic(ExternalService.class);
 
@@ -129,14 +166,45 @@ public class PowerMockTests {
     }
 
     /**
+     * This test shows how to replace/mock a static method call (InnerService.innerProcessStep() ) with the return of
+     * a fixed value.
+     * This is done by using stub() construct.
+     * Note that we do not need a "PowerMockito.mockStatic(ExternalService.class);" line when using stub().
+     *
+     * Used PowerMochk methods:
+     * import static org.powermock.api.support.membermodification.MemberModifier.stub;
+     *
+     * @throws Exception on errors
+     */    @Test
+    public void test_replace_static_method_with_stub() throws Exception {
+        // Set up outer service.
+        OuterService outerService = new OuterService();
+
+        // Replace static method processStep() with the return of a fixed value
+        stub(method(ExternalService.class, "processStep")).toReturn(42);
+
+        // Do the call
+        int retValue = outerService.processStep();
+        assertThat(retValue, is(42));
+    }
+
+
+    /**
      * This test shows how to replace/mock a method call (ExternalService.processStep() ) with another implementation.
-     * This is done by using replace(method().with()).when() construct.
+     * This is done by using replace(method().with()).when() construct.https://blog.jayway.com/2013/03/05/beyond-mocking-with-powermock/
+     *
+     * Used PowerMochk methods:
+     * import static org.powermock.api.support.membermodification.MemberMatcher.method;
+     * import static org.powermock.api.support.membermodification.MemberMatcher.replace;
+     *
+     * Note that we do not need a "PowerMockito.mockStatic(ExternalService.class);" line when using stub().
+     *
      * More examples see here: https://blog.jayway.com/2013/03/05/beyond-mocking-with-powermock/
      *
      * @throws Exception on errors
      */
     @Test
-    public void test_replace_static_method_x() throws Exception {
+    public void test_replace_static_method_with_replace() throws Exception {
         // Set up outer service.
         OuterService outerService = new OuterService();
 
@@ -145,7 +213,7 @@ public class PowerMockTests {
                 new InvocationHandler() {
                     public Object invoke(Object object, Method method,
                                          Object[] arguments) throws Throwable {
-                        System.out.println("p=" + arguments[0]);
+                        System.out.println("Replacement code called with argument: " + arguments[0]);
                         return 42;
                         // Next lines would call the original code in most cases
                         //if (arguments[0].equals(0)) {
@@ -160,5 +228,6 @@ public class PowerMockTests {
         int retValue = outerService.processStep();
         assertThat(retValue, is(42));
     }
+
 
 }
