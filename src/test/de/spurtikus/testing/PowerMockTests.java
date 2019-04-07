@@ -23,17 +23,24 @@ import static org.powermock.api.support.membermodification.MemberMatcher.method;
 import static org.powermock.api.support.membermodification.MemberModifier.suppress;
 import static org.powermock.api.support.membermodification.MemberModifier.stub;
 
+/**
+ * Mocking private and static methods.
+ *
+ * There are examples that replace methods with a "No Operation" and even with a different implementation.
+ */
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest({ PowerMockTests.InnerService.class, ExternalService.class})
 public class PowerMockTests {
 
+    // InnerService with private method
     public class InnerService {
         private void innerProcessing(String a, String b) {
             System.out.println("You should not see this line! innerProcessing " + a + " " + b);
         }
     }
 
+    // OuterService calling innerService and ExternalService with static method
     private class OuterService {
         private InnerService innerService;
 
@@ -41,12 +48,15 @@ public class PowerMockTests {
             this.innerService = innerService;
         }
 
+
         public String processValues(String a, String b) {
+            // call to innerService method
             innerService.innerProcessing(a, b);
             return "abc";
         }
 
         public int processStep() {
+            // call to ExternalService static method
             return ExternalService.processStep(0);
         }
     }
@@ -54,12 +64,42 @@ public class PowerMockTests {
     /**
      * This test shows how to replace/mock a void method call (InnerService.innerProcessing() ) with nothing.
      * This is done by using doNothing().when() construct.
+     *
+     * We use a mock here.
+     *
      * @throws Exception on errors
      */
     @Test
     //@Ignore
     public void test_replace_void_method_with_doNothing() throws Exception {
-        // Set up inner service
+        // Mock inner service
+        InnerService mock = PowerMockito.mock(InnerService.class);
+
+        // Set up outer service. Use mock object instead of real object to allow PowerMockito to
+        // intercept method calls
+        OuterService outerService = new OuterService();
+        outerService.setInnerService(mock);
+
+        // Replace innerProcessing() with doNothing(), i.e. method call
+        // will have no effects at all
+        doNothing().when(mock, "innerProcessing", anyString(), anyString());
+
+        // Do the call
+        String ret = outerService.processValues("xyz", "ggg");
+        assertThat( ret, is("abc"));
+    }
+
+    /**
+     * This test shows how to replace/mock a void method call (InnerService.innerProcessing() ) with nothing.
+     * This is done by using doNothing().when() construct.
+     *
+     * We use a spy() instead of a mock() here.
+     *
+     * @throws Exception on errors
+     */
+    @Test
+    public void test_replace_void_method_with_doNothing_and_spy() throws Exception {
+        // Mock inner service by creating a spy object
         InnerService innerService = new InnerService();
         InnerService spy = PowerMockito.spy(innerService);
 
@@ -83,8 +123,7 @@ public class PowerMockTests {
      *
      * Used PowerMock methods:
      * import static org.powermock.api.support.membermodification.MemberModifier.suppress;
-     * import static org.powermock.api.support.membermodification.MemberModifier.stub;
-     *
+     * import static org.powermock.api.support.membermodification.MemberMatcher.method;
      *
      * More examples see here: https://blog.jayway.com/2013/03/05/beyond-mocking-with-powermock/
 
@@ -94,9 +133,8 @@ public class PowerMockTests {
     public void test_replace_void_method_with_suppress() throws Exception {
         // Set up inner service
         InnerService innerService = new InnerService();
-        //InnerService spy = PowerMockito.spy(innerService);
 
-        // Set up outer service. Use spy object instead of real object to allow PowerMockito to
+        // Set up outer service. Use mock object instead of real object to allow PowerMockito to
         // intercept method calls
         OuterService outerService = new OuterService();
         outerService.setInnerService(innerService);
@@ -119,12 +157,12 @@ public class PowerMockTests {
      */
     @Test
     public void test_replace_void_method_with_doAnswer() throws Exception {
-        InnerService innerService = new InnerService();
-        InnerService spy = PowerMockito.spy(innerService);
+        // Mock inner service
+        InnerService mock = PowerMockito.mock(InnerService.class);
 
         // Set up outer service.
         OuterService outerService = new OuterService();
-        outerService.setInnerService(spy);
+        outerService.setInnerService(mock);
 
         // Replace innerProcessing() with a lambda expression using doAnswer(), i.e. method call
         // will execute the lambda expression instead of the original code.
@@ -136,7 +174,7 @@ public class PowerMockTests {
                 assertEquals(arguments[0], "xyz");
             }
             return null;
-        }).when(spy, "innerProcessing", anyString(), anyString());
+        }).when(mock, "innerProcessing", anyString(), anyString());
 
         // Do the call
         String ret = outerService.processValues("xyz", "ggg");
@@ -171,8 +209,9 @@ public class PowerMockTests {
      * This is done by using stub() construct.
      * Note that we do not need a "PowerMockito.mockStatic(ExternalService.class);" line when using stub().
      *
-     * Used PowerMochk methods:
+     * Used PowerMock methods:
      * import static org.powermock.api.support.membermodification.MemberModifier.stub;
+     * import static org.powermock.api.support.membermodification.MemberMatcher.method;
      *
      * @throws Exception on errors
      */    @Test
@@ -193,9 +232,10 @@ public class PowerMockTests {
      * This test shows how to replace/mock a method call (ExternalService.processStep() ) with another implementation.
      * This is done by using replace(method().with()).when() construct.https://blog.jayway.com/2013/03/05/beyond-mocking-with-powermock/
      *
-     * Used PowerMochk methods:
+     * Used PowerMock methods:
      * import static org.powermock.api.support.membermodification.MemberMatcher.method;
      * import static org.powermock.api.support.membermodification.MemberMatcher.replace;
+     * import java.lang.reflect.InvocationHandler
      *
      * Note that we do not need a "PowerMockito.mockStatic(ExternalService.class);" line when using stub().
      *
@@ -228,6 +268,5 @@ public class PowerMockTests {
         int retValue = outerService.processStep();
         assertThat(retValue, is(42));
     }
-
 
 }
