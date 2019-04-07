@@ -230,7 +230,7 @@ public class PowerMockTests {
 
     /**
      * This test shows how to replace/mock a method call (ExternalService.processStep() ) with another implementation.
-     * This is done by using replace(method().with()).when() construct.https://blog.jayway.com/2013/03/05/beyond-mocking-with-powermock/
+     * This is done by using replace(method().with()).when() construct.
      *
      * Used PowerMock methods:
      * import static org.powermock.api.support.membermodification.MemberMatcher.method;
