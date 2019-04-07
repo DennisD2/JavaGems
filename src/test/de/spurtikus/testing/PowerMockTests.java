@@ -128,12 +128,15 @@ public class PowerMockTests {
         assertThat(retValue, is(42));
     }
 
-    /* The replacement does not work for unknown reason :-( */
-    /*@Test
+    /**
+     * This test shows how to replace/mock a method call (ExternalService.processStep() ) with another implementation.
+     * This is done by using replace(method().with()).when() construct.
+     * More examples see here: https://blog.jayway.com/2013/03/05/beyond-mocking-with-powermock/
+     *
+     * @throws Exception on errors
+     */
+    @Test
     public void test_replace_static_method_x() throws Exception {
-        // Mock some or all static methods on class ExternalService
-        PowerMockito.mockStatic(ExternalService.class);
-
         // Set up outer service.
         OuterService outerService = new OuterService();
 
@@ -156,6 +159,6 @@ public class PowerMockTests {
         // Do the call
         int retValue = outerService.processStep();
         assertThat(retValue, is(42));
-    }*/
+    }
 
 }
