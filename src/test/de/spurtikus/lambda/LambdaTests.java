@@ -14,12 +14,12 @@ public class LambdaTests {
 
     @Data
     @AllArgsConstructor
-    private class Song {
+    private static class Song {
         private String title;
     }
 
     @Data
-    private class Album {
+    private static class Album {
         private String name;
         private List<Song> songs;
 
@@ -71,7 +71,7 @@ public class LambdaTests {
         // This gives Song objects to println() which is not what we want
         album1.getSongs().stream().filter(s -> s.getTitle().contains("daddy")).forEach(System.out::println);
         // use map to transform from song to String
-        album1.getSongs().stream().filter(s -> s.getTitle().contains("daddy")).map(s -> s.getTitle()).forEach(System.out::println);
+        album1.getSongs().stream().map(s -> s.getTitle()).filter(s -> s.contains("daddy")).forEach(System.out::println);
     }
 
     @Test
@@ -86,7 +86,12 @@ public class LambdaTests {
         listList.add(bList);
 
         // Writes "outer level" of list, i.e. the albums
-        listList.forEach(l -> l.stream().forEach(a -> System.out.println(a.getName())));
+        listList.forEach(l -> l.forEach(a -> System.out.println(a.getName())));
+        // Same but with flatMap; we get rid of the encapsulated Lists earlier
+        listList.stream()
+                .flatMap(List::stream)
+                .map(a->a.getName())
+                .forEach(System.out::println);
 
         // Flatten the listList into a flat List
         List<Album> flat = listList.stream()
