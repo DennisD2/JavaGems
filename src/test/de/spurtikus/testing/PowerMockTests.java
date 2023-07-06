@@ -15,19 +15,16 @@ import java.util.Arrays;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.powermock.api.mockito.PowerMockito.*;
-import static org.powermock.api.support.membermodification.MemberMatcher.method;
-import static org.powermock.api.support.membermodification.MemberModifier.suppress;
-import static org.powermock.api.support.membermodification.MemberModifier.stub;
 
 /**
  * Mocking private and static methods.
- *
+ * <p>
  * There are examples that replace methods with a "No Operation" and even with a different implementation.
- *
+ * <p>
  * More examples see e.g. here: https://blog.jayway.com/2013/03/05/beyond-mocking-with-powermock/
  */
 
@@ -36,7 +33,7 @@ import static org.powermock.api.support.membermodification.MemberModifier.stub;
 public class PowerMockTests {
 
     // InnerService with private method
-    public class InnerService {
+    public static class InnerService {
         private void innerProcessing(String a, String b) {
             System.out.println("You should not see this line! innerProcessing " + a + " " + b);
         }
@@ -65,9 +62,9 @@ public class PowerMockTests {
     /**
      * This test shows how to replace/mock a void method call (InnerService.innerProcessing() ) with nothing.
      * This is done by using doNothing().when() construct.
-     *
+     * <p>
      * We use a mock here.
-     *
+     * <p>
      * @throws Exception on errors
      */
     @Test
@@ -92,9 +89,9 @@ public class PowerMockTests {
     /**
      * This test shows how to replace/mock a void method call (InnerService.innerProcessing() ) with nothing.
      * This is done by using doNothing().when() construct.
-     *
+     * <p>
      * We use a spy() instead of a mock() here.
-     *
+     * <p>
      * @throws Exception on errors
      */
     @Test
@@ -119,11 +116,11 @@ public class PowerMockTests {
     /**
      * This test shows how to suppress a void method call (InnerService.innerProcessing()).
      * This is done by using org.powermock.api.support.membermodification.MemberModifier.suppress() construct.
-     *
+     * <p>
      * Used PowerMock methods:
      * import static org.powermock.api.support.membermodification.MemberModifier.suppress;
      * import static org.powermock.api.support.membermodification.MemberMatcher.method;
-     *
+     * <p>
      * @throws Exception on errors
      */
     @Test
@@ -173,7 +170,7 @@ public class PowerMockTests {
         }).when(mock, "innerProcessing", anyString(), anyString());
 
         // Do the call
-        String ret = outerService.processValues("xyz", "ggg");
+        outerService.processValues("xyz", "ggg");
     }
 
     /**
@@ -205,11 +202,11 @@ public class PowerMockTests {
      * a fixed value.
      * This is done by using stub() construct.
      * Note that we do not need a "PowerMockito.mockStatic(ExternalService.class);" line when using stub().
-     *
+     * <p>
      * Used PowerMock methods:
      * import static org.powermock.api.support.membermodification.MemberModifier.stub;
      * import static org.powermock.api.support.membermodification.MemberMatcher.method;
-     *
+     * <p>
      * @throws Exception on errors
      */
     @Test
@@ -229,14 +226,14 @@ public class PowerMockTests {
     /**
      * This test shows how to replace/mock a method call (ExternalService.processStep() ) with another implementation.
      * This is done by using replace(method().with()).when() construct.
-     *
+     * <p>
      * Used PowerMock methods:
      * import static org.powermock.api.support.membermodification.MemberMatcher.method;
      * import static org.powermock.api.support.membermodification.MemberMatcher.replace;
      * import java.lang.reflect.InvocationHandler
-     *
+     * <p>
      * Note that we do not need a "PowerMockito.mockStatic(ExternalService.class);" line when using stub().
-     *
+     * <p>
      * @throws Exception on errors
      */
     @Test
